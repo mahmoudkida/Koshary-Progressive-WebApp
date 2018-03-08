@@ -19,11 +19,8 @@
         <nav>
             <h1>
                 <a href="/">
-                    <img src="img/logo-horizontal.png" alt="Koshary - Resturant Reviews App"
-                         srcset="img/logo-horizontal.png 320w,
-                                 img/logo-horizontal.png 480w,
-                                 img/logo-horizontal.png 800w"
-                         sizes="(max-width:480px) 20%, 10% ">
+                    <img class="logo"  srcset=" /img/logo-horizontal_nnfx9z_c_scale,w_200.png 320w,
+                        /img/logo-horizontal_nnfx9z_c_scale,w_521.png 521w" src="/img/logo-horizontal_nnfx9z_c_scale,w_521.png" alt="Koshary - Resturant Reviews App">
                 </a>
             </h1>
         </nav>
@@ -37,7 +34,7 @@
             <div class="filter-options">
                 <details>
                     <summary id="lbl-toggle-filter">Filter Results</summary>
-                    <p>
+                    <section class="filter-control-container">
                         <label for="neighborhoods-select">
                     Select Neighborhood
                     </label>
@@ -51,7 +48,7 @@
                         <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
                       <option value="all">All Cuisines</option>
                     </select>
-                    </p>
+                    </section>
                 </details>
 
             </div>
