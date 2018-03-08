@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -22,6 +22,7 @@
                     <img class="logo"  srcset=" /img/logo-horizontal_nnfx9z_c_scale,w_200.png 320w,
                         /img/logo-horizontal_nnfx9z_c_scale,w_521.png 521w" src="/img/logo-horizontal_nnfx9z_c_scale,w_521.png" alt="Koshary - Resturant Reviews App">
                 </a>
+                <a href="#maincontent" class="skip">Skip to main content</a>
             </h1>
         </nav>
     </header>
@@ -30,11 +31,13 @@
         <section id="map-container">
             <div id="map"></div>
         </section>
-        <section>
+        <section id="filter-container">
             <div class="filter-options">
-                <details>
-                    <summary id="lbl-toggle-filter">Filter Results</summary>
-                    <section class="filter-control-container">
+                <details open>
+                    <summary id="lbl-toggle-filter" role="button" aria-expanded="true" aria-controls="filter-control-container" aria-haspopup="true" onclick="changeAriaValue(this);">
+                        Filter Results
+                    </summary>
+                    <section class="filter-control-container" id="filter-control-container" role="tabpanel" aria-labelledby="lbl-toggle-filter">
                         <label for="neighborhoods-select">
                     Select Neighborhood
                     </label>
@@ -52,6 +55,8 @@
                 </details>
 
             </div>
+        </section>
+        <section id="resturants-list-container">
             <ul id="restaurants-list"></ul>
         </section>
     </main>

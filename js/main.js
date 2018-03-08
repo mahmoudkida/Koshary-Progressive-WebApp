@@ -148,8 +148,9 @@ createRestaurantHTML = (restaurant) => {
     li.append(picture);
     const dataContainer = document.createElement('article');
     li.append(dataContainer);
-    const name = document.createElement('h1');
+    const name = document.createElement('a');
     name.innerHTML = restaurant.name;
+    name.href = DBHelper.urlForRestaurant(restaurant);
     dataContainer.append(name);
 
     const neighborhood = document.createElement('p');
@@ -162,6 +163,7 @@ createRestaurantHTML = (restaurant) => {
 
     const more = document.createElement('a');
     more.innerHTML = 'View Details';
+    more.classList.add("more");
     more.href = DBHelper.urlForRestaurant(restaurant);
     dataContainer.append(more)
 
@@ -180,4 +182,9 @@ addMarkersToMap = (restaurants = self.restaurants) => {
         });
         self.markers.push(marker);
     });
+}
+
+/*change aria expanded value*/
+function changeAriaValue(that){
+    that.getAttribute("aria-expanded") == "true" ? that.setAttribute("aria-expanded","false"):that.setAttribute("aria-expanded","true");
 }
