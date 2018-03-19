@@ -4,5 +4,11 @@
         "sizes": "192x192",
         "type": "image/png"
     }],
-    "start_url": "/"
+    "start_url": "/",
+	"name": "Koshary",
+  "short_name": "Koshary",
+  "display": "standalone",
+  "background_color": "#6e43fc",
+  "theme_color": "#6e43fc",
+  "description": "A restaurant review app."
 }

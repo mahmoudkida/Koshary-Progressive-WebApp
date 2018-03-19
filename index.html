@@ -6,6 +6,8 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="Koshary is a progressive web app for resturants reviews built as part of udacity nandodegree program by Mahmoud Kida">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#6e43fc">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="apple-touch-icon" href="icon.png">
     <!-- Place favicon.ico in the root directory -->
 
@@ -66,9 +68,16 @@
     <footer id="footer">
         Copyright (c) 2018 <a href="/"><strong>Koshary - Restaurant Reviews App</strong></a> All Rights Reserved Made with ❤ by Mahmoud Kida.
     </footer>
+    <!-- Beginning scripts -->
+    <!--service worker controller-->
+    <script src="js/swhelper.js"></script>
+    <!-- Database helpers -->
     <script src="js/dbhelper.js"></script>
+    <!-- Main javascript file -->
     <script src="js/main.js"></script>
+    <!-- Google Maps -->
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmX7Od4d5_bvaU2XMccR39jCSmi5d5eWg&libraries=places&callback=initMap"></script>
+    <!-- End scripts -->
 
 </body>
 
