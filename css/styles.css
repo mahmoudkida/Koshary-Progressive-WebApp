@@ -41,7 +41,8 @@ a:focus {
     text-decoration: none;
 }
 
-a, img {
+a,
+img {
     border: none 0px #fff;
     max-width: 100%;
 }
@@ -83,6 +84,10 @@ section {
     padding: 25px;
     text-align: center;
     text-transform: uppercase;
+}
+
+#footer a strong {
+    color: #AA92FC;
 }
 
 /* ====================== Navigation ====================== */
@@ -147,7 +152,7 @@ a.skip:hover {
 
 
 #breadcrumb {
-    padding: 10px 40px 16px;
+    padding: 10px 20px 16px;
     list-style: none;
     background-color: #eee;
     font-size: 1.0625rem;
@@ -172,14 +177,14 @@ a.skip:hover {
 /* Add a color to all links inside the list */
 
 #breadcrumb li a {
-    color: #0275d8;
+    color: #6e43fc;
     text-decoration: none;
 }
 
 /* Add a color on mouse-over */
 
 #breadcrumb li a:hover {
-    color: #01447e;
+    color: #5b36d6;
     text-decoration: underline;
 }
 
@@ -321,6 +326,7 @@ a.skip:hover {
     right: 0;
     /* top: 80px; */
     width: 100%;
+    margin-top: 120px;
 }
 
 .inside #map {
@@ -334,7 +340,7 @@ a.skip:hover {
 }
 
 #restaurant-name {
-    color: #f18200;
+    color: #6e43fc;
     font-size: 1.625rem;
     font-weight: 200;
     letter-spacing: 0;
@@ -343,9 +349,7 @@ a.skip:hover {
     line-height: 1.1;
 }
 
-#restaurant-img {
-
-}
+#restaurant-img {}
 
 #restaurant-address {
     font-size: 1rem;
@@ -376,7 +380,7 @@ a.skip:hover {
 }
 
 #reviews-container h2 {
-    color: #f58500;
+    color: #6e43fc;
     font-size: 2rem;
     font-weight: 300;
     letter-spacing: -1px;
@@ -395,7 +399,7 @@ a.skip:hover {
     list-style-type: none;
     margin: 0 0 30px;
     overflow: hidden;
-    padding: 0 20px 20px;
+    padding: 20px;
     position: relative;
 }
 
@@ -407,9 +411,24 @@ a.skip:hover {
     color: #666;
 }
 
+#reviews-list li h3 {
+    margin-bottom: 10px;
+}
 
+#restaurant-hours {
+    width: 100%;
+}
 
+#restaurant-hours td,
+#restaurant-hours th {
+    padding: 10px;
+    border-bottom: 1px solid #7643fc;
+}
 
+#restaurant-hours th {
+    background: #7643fc;
+    color: white;
+}
 
 /*Medium devices (tablets, 768px and up)*/
 
@@ -433,18 +452,18 @@ a.skip:hover {
         display: flex;
         flex-wrap: wrap;
     }
-    #map-container{
+    #map-container {
         width: 65%;
     }
-    #filter-container{
+    #filter-container {
         width: 35%;
     }
-    .filter-options{
-            height: 100%;
+    .filter-options {
+        height: 100%;
     }
-    #restaurants-list{
-            padding: 30px 0px 60px;
-    margin: 0 -10px;
+    #restaurants-list {
+        padding: 30px 0px 60px;
+        margin: 0 -10px;
     }
     #restaurants-list li {
         width: calc( 25% - 20px);
@@ -463,6 +482,29 @@ a.skip:hover {
     .filter-control-container select {
         width: 100%;
         margin-bottom: 20px;
+    }
+    #restaurant-container,
+    #reviews-container {
+        width: 45vw;
+    }
+    #restaurant-container {
+        margin-top: 120px;
+    }
+    .inside #map-container {
+        height: calc( 100vh - 192px);
+        position: fixed;
+        right: 10px;
+        width: 41vw;
+    }
+    .inside #footer {
+        position: fixed;
+        bottom: 0;
+    }
+    .inside #maincontent {
+        padding-bottom: 70px;
+    }
+    #breadcrumb {
+        padding: 10px 13% 16px;
     }
 
 
