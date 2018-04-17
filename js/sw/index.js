@@ -1,21 +1,25 @@
-var staticCacheName = 'kohsary-static-v1';
+const staticCacheName = 'kohsary-static-v1';
 
-self.addEventListener('install', function (event) {
-    event.waitUntil(
-        caches.open(staticCacheName).then(function (cache) {
-            return cache.addAll([
-          '/index.html',
-        '/js/main.js',
-        '/js/dbhelper.js',
-        '/js/restuarant_info.js',
-        '/data/restautrants.js',
-        '/css/styles.css',
-            'https://normalize-css.googlecode.com/svn/trunk/normalize.css',
-        '/icon.png',
-                'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmX7Od4d5_bvaU2XMccR39jCSmi5d5eWg&libraries=places&callback=initMap'
-      ]);
-        })
-    );
+//files names
+const cssFiles = ['styles'];
+const dataFiles = ['restaurants'];
+const imgFiles = [1,2,3,4,5,6,7,8,9,10];
+const jsFiles = ['dbhelper', 'main', 'restaurant_info'];
+const htmlFiles = ['index', 'restaurant'];
+
+self.addEventListener('install', function(event) {
+	event.waitUntil(
+		caches.open(staticCacheName).then(function(cache) {
+			return cache.addAll([
+				'',
+				...htmlFiles.map( fileName => `/${fileName}.html`),
+				...cssFiles.map( fileName => `/css/${fileName}.css`),
+				...dataFiles.map( fileName => `/data/${fileName}.json`),
+				...imgFiles.map( fileName => `/img/${fileName}.jpg`),
+				...jsFiles.map( fileName => `/js/${fileName}.js`)
+			]);
+		})
+	);
 });
 
 self.addEventListener('activate', function (event) {
@@ -37,10 +41,10 @@ self.addEventListener('fetch', function (event) {
     var requestUrl = new URL(event.request.url);
 
     if (requestUrl.origin === location.origin) {
-//        if (requestUrl.pathname === '/') {
-//            event.respondWith(caches.match('/skeleton'));
-//            return;
-//        }
+        //        if (requestUrl.pathname === '/') {
+        //            event.respondWith(caches.match('/skeleton'));
+        //            return;
+        //        }
         if (requestUrl.pathname.includes('img/')) {
             event.respondWith(servePhoto(event.request));
             return;

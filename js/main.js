@@ -80,6 +80,10 @@ window.initMap = () => {
         center: loc,
         scrollwheel: false
     });
+    //set title for the map iframe for increased accessability
+//    setTimeout(function(){
+//            document.getElementById('map').getElementsByTagName("iframe")[0].setAttribute("title","Google Maps - An interactive map showing multiple restuarants' locations according to the filtered neighborhood and cuisine");
+//    },10);
     updateRestaurants();
 }
 
