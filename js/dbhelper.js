@@ -3,6 +3,22 @@
  */
 class DBHelper {
 
+
+    static openDatabase() {
+        // If the browser doesn't support service worker,
+        // we don't care about having a database
+        if (!navigator.serviceWorker) {
+            return Promise.resolve();
+        }
+
+        return idb.open('koshary', 1, function (upgradeDb) {
+            var store = upgradeDb.createObjectStore('restaurants', {
+                keyPath: 'id'
+            });
+            store.createIndex('id', 'id');
+        });
+    }
+
     /**
      * Database URL.
      * Change this to restaurants.json file location on your server.
@@ -21,7 +37,17 @@ class DBHelper {
             return response.json();
         }).then((json) => {
 
+            //add restuarants object array into a variable
             const restaurants = json.restaurants;
+            //open indexdb to cach all restaurants data
+            DBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('restaurants', 'readwrite');
+                var store = tx.objectStore('restaurants');
+                restaurants.forEach(function (restaurant) {
+                    store.put(restaurant);
+                });
+            });
             callback(null, restaurants);
 
         }).catch((ex) => {

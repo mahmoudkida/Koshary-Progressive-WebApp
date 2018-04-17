@@ -4,17 +4,14 @@ self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.open(staticCacheName).then(function (cache) {
             return cache.addAll([
-          'index.html',
-        'js/main.js',
-        'js/dbhelper.js',
-        'js/restuarant_info.js',
-        'data/restautrants.js',
-        'css/styles.css',
+          '/index.html',
+        '/js/main.js',
+        '/js/dbhelper.js',
+        '/js/restuarant_info.js',
+        '/data/restautrants.js',
+        '/css/styles.css',
             'https://normalize-css.googlecode.com/svn/trunk/normalize.css',
-        'icon.png',
-          'img/logo-horizontal.png',
-          'img/logo-horizontal_nnfx9z_c_scale,w_200.png',
-          'logo-horizontal_nnfx9z_c_scale,w_521.png',
+        '/icon.png',
                 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmX7Od4d5_bvaU2XMccR39jCSmi5d5eWg&libraries=places&callback=initMap'
       ]);
         })
@@ -39,12 +36,19 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
     var requestUrl = new URL(event.request.url);
 
-    //  if (requestUrl.origin === location.origin) {
-    //    if (requestUrl.pathname === '/') {
-    //      event.respondWith(caches.match('/skeleton'));
-    //      return;
-    //    }
-    //  }
+    if (requestUrl.origin === location.origin) {
+//        if (requestUrl.pathname === '/') {
+//            event.respondWith(caches.match('/skeleton'));
+//            return;
+//        }
+        if (requestUrl.pathname.includes('img/')) {
+            event.respondWith(servePhoto(event.request));
+            return;
+        }
+    }
+
+
+
 
     event.respondWith(
         caches.match(event.request).then(function (response) {
@@ -52,6 +56,26 @@ self.addEventListener('fetch', function (event) {
         })
     );
 });
+
+
+function servePhoto(request) {
+    var storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
+
+    return caches.open(contentImgsCache).then(function (cache) {
+        return cache.match(storageUrl).then(function (response) {
+            if (response) return response;
+
+            return fetch(request).then(function (networkResponse) {
+                cache.put(storageUrl, networkResponse.clone());
+                return networkResponse;
+            });
+        });
+    });
+}
+
+
+
+
 
 self.addEventListener('message', function (event) {
     if (event.data.action === 'skipWaiting') {
