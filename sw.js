@@ -1,10 +1,14 @@
 const staticCacheName = 'kohsary-static-v1';
-
+var contentImgsCache = 'kohsary-content-imgs';
+var allCaches = [
+  staticCacheName,
+  contentImgsCache
+];
 //files names
-const cssFiles = ['styles'];
+const cssFiles = ['main'];
 const dataFiles = ['restaurants'];
 const imgFiles = [1,2,3,4,5,6,7,8,9,10];
-const jsFiles = ['dbhelper', 'main', 'restaurant_info'];
+const jsFiles = ['main'];
 const htmlFiles = ['index', 'restaurant'];
 
 self.addEventListener('install', function(event) {
@@ -12,30 +16,33 @@ self.addEventListener('install', function(event) {
 		caches.open(staticCacheName).then(function(cache) {
 			return cache.addAll([
 				'',
-				...htmlFiles.map( fileName => `/${fileName}.html`),
-				...cssFiles.map( fileName => `/css/${fileName}.css`),
-				...dataFiles.map( fileName => `/data/${fileName}.json`),
-				...imgFiles.map( fileName => `/img/${fileName}.jpg`),
-				...jsFiles.map( fileName => `/js/${fileName}.js`)
+				...htmlFiles.map( fileName => `${fileName}.html`),
+				...cssFiles.map( fileName => `css/${fileName}.css`),
+//				//...dataFiles.map( fileName => `data/${fileName}.json`),
+				...imgFiles.map( fileName => `img/${fileName}.jpg`),
+				...jsFiles.map( fileName => `js/${fileName}.js`)
 			]);
 		})
 	);
 });
 
-self.addEventListener('activate', function (event) {
-    event.waitUntil(
-        caches.keys().then(function (cacheNames) {
-            return Promise.all(
-                cacheNames.filter(function (cacheName) {
-                    return cacheName.startsWith('kohsary-') &&
-                        cacheName != staticCacheName;
-                }).map(function (cacheName) {
-                    return caches.delete(cacheName);
-                })
-            );
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(function(cacheName) {
+          return cacheName.startsWith('kohsary-') &&
+                 !allCaches.includes(cacheName);
+        }).map(function(cacheName) {
+          return caches.delete(cacheName);
         })
-    );
+      );
+    })
+  );
 });
+
+
 
 self.addEventListener('fetch', function (event) {
     var requestUrl = new URL(event.request.url);

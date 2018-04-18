@@ -9,7 +9,7 @@ IndexController.prototype._registerServiceWorker = function() {
 
   var indexController = this;
 
-  navigator.serviceWorker.register('/js/sw/index.js').then(function(reg) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
     if (!navigator.serviceWorker.controller) {
       return;
     }
@@ -59,4 +59,4 @@ if (toast != null) {
 };
 
 //initialize sw
-swController = new IndexController();
+const swController = new IndexController();

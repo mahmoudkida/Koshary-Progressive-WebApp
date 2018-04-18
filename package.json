@@ -1,0 +1,48 @@
+{
+  "name": "koshary-restaurant-review-progressive-app",
+  "version": "1.0.0",
+  "description": "A progressive web app will compelete care of accessability, responsiveness and offline performance",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mahmoudkida:User@2015@github.com/mahmoudkida/Resturant-Review-App-Stage-1-Responsive-Accessability-Offline.git"
+  },
+  "keywords": [
+    "progressive",
+    "accessability",
+    "offline",
+    "first",
+    "responsive"
+  ],
+  "author": "Mahmoud Kida",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mahmoudkida/Resturant-Review-App-Stage-1-Responsive-Accessability-Offline/issues"
+  },
+  "homepage": "https://github.com/mahmoudkida/Resturant-Review-App-Stage-1-Responsive-Accessability-Offline#readme",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.3",
+    "babel-preset-env": "^1.6.1",
+    "browser-sync": "^2.23.6",
+    "eslint-plugin-babel": "^5.0.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^5.0.0",
+    "gulp-babel": "^7.0.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-eslint": "^4.0.2",
+    "gulp-htmlmin": "^4.0.0",
+    "gulp-imagemin": "^4.1.0",
+    "gulp-json-srv": "^1.2.0",
+    "gulp-sass": "^4.0.1",
+    "gulp-server-livereload": "^1.9.2",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.0",
+    "gulp-useref": "^3.1.5",
+    "imagemin": "^5.3.1",
+    "imagemin-pngquant": "^5.1.0"
+  }
+}
