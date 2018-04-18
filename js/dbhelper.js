@@ -24,9 +24,10 @@ class DBHelper {
      * Change this to restaurants.json file location on your server.
      */
     static get DATABASE_URL() {
-        const port = location.port ? location.port : 8000 // Change this to your server port
+        //const port = location.port ? location.port : 8000 // Change this to your server port
+        const port = 3005; //change according to gulpfile config
         const host = location.hostname ? location.hostname : 'localhost'
-        return `http://${host}:${port}/data/restaurants.json`;
+        return `http://${host}:${port}/restaurants`;
     }
 
     /**
@@ -38,7 +39,7 @@ class DBHelper {
         }).then((json) => {
 
             //add restuarants object array into a variable
-            const restaurants = json.restaurants;
+            const restaurants = json;
             //open indexdb to cach all restaurants data
             DBHelper.openDatabase().then(function (db) {
                 if (!db) return;

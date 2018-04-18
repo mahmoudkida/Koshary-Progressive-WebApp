@@ -15,17 +15,28 @@ const eslint = require('gulp-eslint');
 const babel = require('gulp-babel');
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
-const imagemin = require('imagemin');
-const imageminPngquant = require('imagemin-pngquant');
+const imagemin = require('gulp-imagemin');
+const pngquant = require('imagemin-pngquant');
 const browserSync = require('browser-sync').create();
-var htmlmin = require('gulp-htmlmin');
+const htmlmin = require('gulp-htmlmin');
+const uglify = require('gulp-uglify');
+const useref = require('gulp-useref');
+const jsonServer = require("gulp-json-srv");
+
+const server = jsonServer.create({
+	port: 3005,
+	id:   '_id',
+});
 
 
 
-
+gulp.task("json-server", function(){
+    return gulp.src("data/restaurants.json")
+        .pipe(server.pipe());
+});
 
 //browser sync task
-gulp.task('serve', ['sass', 'js', 'img'], function () {
+gulp.task('serve', ['html', 'sass', 'js', 'img', 'copyfiles','json-server'], function () {
 
     browserSync.init({
         server: "./dist"
@@ -47,25 +58,26 @@ gulp.task('sass', function () {
             browsers: ['last 2 versions'],
         }))
         .pipe(concat('main.css'))
-        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest("dist/css"))
         .pipe(browserSync.stream());
 });
 
 // process JS files and return the stream.
 gulp.task('js', function () {
-    return gulp.src('js/*js')
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError())
+    return gulp.src(['js/idb.js',
+                    'js/swhelper.js',
+                     'js/dbhelper.js',
+                     'js/index.js',
+                     'js/restaurant_info.js'
+                    ])
         .pipe(sourcemaps.init())
         .pipe(babel({
             presets: ['env']
         }))
-
         .pipe(concat('main.js'))
-        .pipe(sourcemaps.write())
         .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
         .pipe(browserSync.stream());
 });
@@ -76,18 +88,29 @@ gulp.task('img', function () {
             progressive: true,
             use: [pngquant()]
         }))
-        .pipe(gulp.dest('dist/img'));
+        .pipe(gulp.dest('dist/img'))
+        .pipe(browserSync.stream());
 });
 
 gulp.task('html', function () {
     return gulp.src('*.html')
-    .pipe(htmlmin({collapseWhitespace: true}))
-    .pipe(gulp.dest('dist'));
+        .pipe(useref())
+        .pipe(htmlmin({
+            collapseWhitespace: true
+        }))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('copyfiles', function () {
-     return gulp.src(['.htaccess','favicon.ico','humans.txt','icon.png','icon-512.png','manifest.json','robots.txt'])
-     .pipe(gulp.dest('dist'));
+    return gulp.src(['.htaccess', 'favicon.ico', 'humans.txt', 'icon.png', 'icon-512.png', 'manifest.json', 'robots.txt', 'sw.js'])
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('lint', function () {
+    return gulp.src('js/*js')
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError())
 });
 
 gulp.task('default', ['serve']);

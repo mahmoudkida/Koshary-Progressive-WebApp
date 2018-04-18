@@ -1,0 +1,25 @@
+{
+    "app": {
+        "background": {
+            "scripts": [""]
+        }
+    },
+    "manifest_version": 2,
+    "name": "Koshary",
+
+    "icons": [{
+        "src": "icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    }, {
+        "src": "icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    }],
+    "start_url": "/index.html",
+    "short_name": "Koshary",
+    "display": "standalone",
+    "background_color": "#6e43fc",
+    "theme_color": "#6e43fc",
+    "description": "A restaurant review app."
+}
