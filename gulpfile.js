@@ -42,14 +42,14 @@ gulp.task('serve', ['html', 'sass', 'js', 'img', 'copyfiles','json-server'], fun
         server: "./dist"
     });
 
-    gulp.watch("scss/*.scss", ['sass']);
-    gulp.watch("js/*.js", ['js']);
-    gulp.watch("*.html").on('change', browserSync.reload);
+    gulp.watch("app/scss/*.scss", ['sass']);
+    gulp.watch("app/js/*.js", ['js']);
+    gulp.watch("app/*.html").on('change', browserSync.reload);
 });
 
 // Compile sass into CSS & auto-inject into browsers
 gulp.task('sass', function () {
-    return gulp.src("scss/*.scss")
+    return gulp.src("app/scss/*.scss")
         .pipe(sourcemaps.init())
         .pipe(sass({
             outputStyle: 'compressed'
@@ -65,11 +65,12 @@ gulp.task('sass', function () {
 
 // process JS files and return the stream.
 gulp.task('js', function () {
-    return gulp.src(['js/idb.js',
-                    'js/swhelper.js',
-                     'js/dbhelper.js',
-                     'js/index.js',
-                     'js/restaurant_info.js'
+    return gulp.src(['app/js/blazy.js',
+                    'app/js/idb.js',
+                    'app/js/swhelper.js',
+                     'app/js/dbhelper.js',
+                     'app/js/index.js',
+                     'app/js/restaurant_info.js'
                     ])
         .pipe(sourcemaps.init())
         .pipe(babel({
@@ -83,7 +84,7 @@ gulp.task('js', function () {
 });
 
 gulp.task('img', function () {
-    return gulp.src("img/*")
+    return gulp.src("app/img/*")
         .pipe(imagemin({
             progressive: true,
             use: [pngquant()]
@@ -93,7 +94,7 @@ gulp.task('img', function () {
 });
 
 gulp.task('html', function () {
-    return gulp.src('*.html')
+    return gulp.src('app/*.html')
         .pipe(useref())
         .pipe(htmlmin({
             collapseWhitespace: true
@@ -102,7 +103,7 @@ gulp.task('html', function () {
 });
 
 gulp.task('copyfiles', function () {
-    return gulp.src(['.htaccess', 'favicon.ico', 'humans.txt', 'icon.png', 'icon-512.png', 'manifest.json', 'robots.txt', 'sw.js'])
+    return gulp.src(['.htaccess', 'favicon.ico', 'humans.txt', 'app/icon.png', 'app/icon-512.png', 'manifest.json', 'robots.txt', 'sw.js'])
         .pipe(gulp.dest('dist'));
 });
 

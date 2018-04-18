@@ -57,7 +57,11 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
 
     const image = document.getElementById('restaurant-img');
     image.className = 'restaurant-img'
-    image.src = DBHelper.imageUrlForRestaurant(restaurant);
+    //image.src = DBHelper.imageUrlForRestaurant(restaurant);
+    image.setAttribute("data-src",`img/${DBHelper.imageUrlForRestaurant(restaurant)}`);
+    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
+    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
+    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
     image.setAttribute("alt", restaurant.name + " Restaurant Main Image");
 
     const cuisine = document.getElementById('restaurant-cuisine');
@@ -168,3 +172,17 @@ const getParameterByName = (name, url) => {
         return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+
+//lazy load images
+//let bLazy = new Blazy({
+//        breakpoints: [{
+//	    width: 300 // Max-width
+//          , src: 'data-src-small'
+//	},{
+//	    width: 580 // Max-width
+//          , src: 'data-src-medium'
+//	},{
+//	    width: 800 // Max-width
+//          , src: 'data-src-large'
+//	}]
+//   });

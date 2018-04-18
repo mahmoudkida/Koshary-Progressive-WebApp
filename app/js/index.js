@@ -145,9 +145,12 @@ const createRestaurantHTML = (restaurant) => {
     li.setAttribute("role","listitem")
 
     const image = document.createElement('img');
+    const imageSrc= DBHelper.imageUrlForRestaurant(restaurant);
     image.className = 'restaurant-img';
-    image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.srcset = restaurant.srcset;
+    image.setAttribute("data-src",`img/${imageSrc}`);
+    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
+    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
+    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
     image.alt = restaurant.name;
     const picture = document.createElement('picture');
     picture.append(image);
@@ -196,3 +199,4 @@ const addMarkersToMap = (restaurants = self.restaurants) => {
 const changeAriaValue = (that) =>{
     that.getAttribute("aria-expanded") == "true" ? that.setAttribute("aria-expanded","false"):that.setAttribute("aria-expanded","true");
 }
+
