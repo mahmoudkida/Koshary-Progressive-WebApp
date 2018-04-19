@@ -41,10 +41,10 @@ class DBHelper {
             //add restuarants object array into a variable
             const restaurants = json;
             //open indexdb to cach all restaurants data
-            DBHelper.openDatabase().then(function (db) {
+            DBHelper.openDatabase().then( (db) => {
                 if (!db) return;
-                var tx = db.transaction('restaurants', 'readwrite');
-                var store = tx.objectStore('restaurants');
+                let tx = db.transaction('restaurants', 'readwrite');
+                let store = tx.objectStore('restaurants');
                 restaurants.forEach(function (restaurant) {
                     store.put(restaurant);
                 });
@@ -52,6 +52,15 @@ class DBHelper {
             callback(null, restaurants);
 
         }).catch((ex) => {
+            DBHelper.openDatabase().then( (db) => {
+                if (!db) return;
+                let tx = db.transaction('restaurants', 'readwrite');
+                let store = tx.objectStore('restaurants');
+                let idIndex = store.index("id");
+                return idIndex.getAll();
+            }).then((json)=>{
+                const restaurants = json;
+            });
             const error = (`Request failed. Returned status of ${ex}`);
             callback(error, null);
         });
