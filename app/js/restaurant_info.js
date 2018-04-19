@@ -5,10 +5,11 @@ var map;
 /**
  * Initialize Google map, called from HTML.
  */
-function initInnerMap () {
+
+const initMap = () => {
     fetchRestaurantFromURL((error, restaurant) => {
         if (error) { // Got an error!
-            //console.error(error);
+            console.error(error);
         } else {
             self.map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 16,
@@ -37,7 +38,7 @@ const fetchRestaurantFromURL = (callback) => {
         DBHelper.fetchRestaurantById(id, (error, restaurant) => {
             self.restaurant = restaurant;
             if (!restaurant) {
-                //console.error(error);
+                console.error(error);
                 return;
             }
             fillRestaurantHTML();
@@ -56,12 +57,15 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
     address.innerHTML = restaurant.address;
 
     const image = document.getElementById('restaurant-img');
-    image.className = 'restaurant-img'
+    image.className = 'restaurant-img b-lazy';
     //image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.setAttribute("data-src",`img/${DBHelper.imageUrlForRestaurant(restaurant)}`);
-    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
-    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
-    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
+    image.src = "/img/placeholder-image.png";
+    image.setAttribute("data-src", `${DBHelper.imageUrlForRestaurant(restaurant)}`);
+    image.setAttribute("data-srcset", `/img/${restaurant.id}_300.jpg 300w,/img/${restaurant.id}.jpg 586w,/img/${restaurant.id}_800.jpg 800w`);
+
+    //    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
+    //    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
+    //    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
     image.setAttribute("alt", restaurant.name + " Restaurant Main Image");
 
     const cuisine = document.getElementById('restaurant-cuisine');
@@ -84,7 +88,7 @@ const fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hour
         const row = document.createElement('tr');
 
         const day = document.createElement('th');
-        day.setAttribute("role","rowheader");
+        day.setAttribute("role", "rowheader");
         day.innerHTML = key;
         row.appendChild(day);
 
@@ -115,7 +119,12 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     reviews.forEach(review => {
         ul.appendChild(createReviewHTML(review));
     });
+
     container.appendChild(ul);
+    //init lazy loading
+    setTimeout(function () {
+        bLazy.revalidate();
+    });
 }
 
 /**
@@ -123,7 +132,7 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
  */
 const createReviewHTML = (review) => {
     const li = document.createElement('li');
-    li.setAttribute("role","listitem")
+    li.setAttribute("role", "listitem")
 
     const name = document.createElement('h3');
     name.innerHTML = review.name;
@@ -153,7 +162,7 @@ const fillBreadcrumb = (restaurant = self.restaurant) => {
     const breadcrumb = document.getElementById('breadcrumb');
     const li = document.createElement('li');
     li.innerHTML = restaurant.name;
-    li.setAttribute("aria-current","page");
+    li.setAttribute("aria-current", "page");
     breadcrumb.appendChild(li);
 }
 
@@ -173,16 +182,7 @@ const getParameterByName = (name, url) => {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-//lazy load images
-//let bLazy = new Blazy({
-//        breakpoints: [{
-//	    width: 300 // Max-width
-//          , src: 'data-src-small'
-//	},{
-//	    width: 580 // Max-width
-//          , src: 'data-src-medium'
-//	},{
-//	    width: 800 // Max-width
-//          , src: 'data-src-large'
-//	}]
-//   });
+
+const bLazy = new Blazy({
+    // Options
+});

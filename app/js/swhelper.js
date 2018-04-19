@@ -50,7 +50,7 @@ IndexController.prototype._trackInstalling = function(worker) {
 
 IndexController.prototype._updateReady = function(worker) {
 
-    var toast = prompt("New version available, do you want to upate ?");
+    var toast = confirm("New version available, do you want to upate ?");
 
 if (toast != null) {
     worker.postMessage({action: 'skipWaiting'});

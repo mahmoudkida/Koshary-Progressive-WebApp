@@ -36,15 +36,15 @@ gulp.task("json-server", function(){
 });
 
 //browser sync task
-gulp.task('serve', ['html', 'sass', 'js', 'img', 'copyfiles','json-server'], function () {
+gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js', 'img', 'copyfiles','json-server'], function () {
 
     browserSync.init({
         server: "./dist"
     });
 
     gulp.watch("app/scss/*.scss", ['sass']);
-    gulp.watch("app/js/*.js", ['js']);
-    gulp.watch("app/*.html").on('change', browserSync.reload);
+    gulp.watch("app/js/*.js", ['index-js','restaurent-detail-js','vendor-js']);
+    gulp.watch("app/*.html",['html']).on('change', browserSync.reload);
 });
 
 // Compile sass into CSS & auto-inject into browsers
@@ -64,19 +64,44 @@ gulp.task('sass', function () {
 });
 
 // process JS files and return the stream.
-gulp.task('js', function () {
-    return gulp.src(['app/js/blazy.js',
-                    'app/js/idb.js',
+gulp.task('index-js', function () {
+    return gulp.src([
                     'app/js/swhelper.js',
                      'app/js/dbhelper.js',
                      'app/js/index.js',
+                    ])
+        .pipe(sourcemaps.init())
+        .pipe(babel({
+            presets: ['env']
+        }))
+        .pipe(concat('index.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/js'))
+        .pipe(browserSync.stream());
+});
+gulp.task('restaurent-detail-js', function () {
+    return gulp.src([
+                    'app/js/swhelper.js',
+                     'app/js/dbhelper.js',
                      'app/js/restaurant_info.js'
                     ])
         .pipe(sourcemaps.init())
         .pipe(babel({
             presets: ['env']
         }))
-        .pipe(concat('main.js'))
+        .pipe(concat('restaurant_info.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/js'))
+        .pipe(browserSync.stream());
+});
+gulp.task('vendor-js', function () {
+    return gulp.src(['app/js/blazy.js',
+                    'app/js/idb.js',
+                    ])
+        .pipe(sourcemaps.init())
+        .pipe(concat('vendor.js'))
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
@@ -86,7 +111,9 @@ gulp.task('js', function () {
 gulp.task('img', function () {
     return gulp.src("app/img/*")
         .pipe(imagemin({
+            interlaced: true,
             progressive: true,
+            optimizationLevel: 5,
             use: [pngquant()]
         }))
         .pipe(gulp.dest('dist/img'))

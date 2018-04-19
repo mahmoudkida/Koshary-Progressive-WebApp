@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 const fetchNeighborhoods = () => {
     DBHelper.fetchNeighborhoods((error, neighborhoods) => {
         if (error) { // Got an error
-            //console.error(error);
+            console.error(error);
         } else {
             self.neighborhoods = neighborhoods;
             fillNeighborhoodsHTML();
@@ -45,7 +45,7 @@ const fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
 const fetchCuisines = () => {
     DBHelper.fetchCuisines((error, cuisines) => {
         if (error) { // Got an error!
-            //console.error(error);
+            console.error(error);
         } else {
             self.cuisines = cuisines;
             fillCuisinesHTML();
@@ -71,7 +71,6 @@ const fillCuisinesHTML = (cuisines = self.cuisines) => {
  * Initialize Google map, called from HTML.
  */
 function initMap(){
-    debugger
     let loc = {
         lat: 40.722216,
         lng: -73.987501
@@ -134,7 +133,12 @@ const fillRestaurantsHTML = (restaurants = self.restaurants) => {
     restaurants.forEach(restaurant => {
         ul.append(createRestaurantHTML(restaurant));
     });
+
     addMarkersToMap();
+    //init lazy loading
+    setTimeout(function () {
+        bLazy.revalidate();
+    },10);
 }
 
 /**
@@ -146,11 +150,14 @@ const createRestaurantHTML = (restaurant) => {
 
     const image = document.createElement('img');
     const imageSrc= DBHelper.imageUrlForRestaurant(restaurant);
-    image.className = 'restaurant-img';
-    image.setAttribute("data-src",`img/${imageSrc}`);
-    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
-    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
-    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
+    image.className = 'restaurant-img b-lazy';
+    image.src="/img/placeholder-image.png";
+    image.setAttribute("data-src",`${imageSrc}`);
+    image.setAttribute("data-srcset", `/img/${restaurant.id}_300.jpg 300w,/img/${restaurant.id}.jpg 586w,/img/${restaurant.id}_800.jpg 800w`);
+
+//    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
+//    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
+//    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
     image.alt = restaurant.name;
     const picture = document.createElement('picture');
     picture.append(image);
@@ -200,3 +207,8 @@ const changeAriaValue = (that) =>{
     that.getAttribute("aria-expanded") == "true" ? that.setAttribute("aria-expanded","false"):that.setAttribute("aria-expanded","true");
 }
 
+
+
+    const bLazy = new Blazy({
+        // Options
+    });
