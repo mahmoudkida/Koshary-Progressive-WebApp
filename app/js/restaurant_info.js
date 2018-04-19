@@ -124,7 +124,7 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     //init lazy loading
     setTimeout(function () {
         bLazy.revalidate();
-    });
+    },10);
 }
 
 /**
