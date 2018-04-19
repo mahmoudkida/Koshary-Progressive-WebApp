@@ -52,6 +52,7 @@ class DBHelper {
             callback(null, restaurants);
 
         }).catch((ex) => {
+            const error = (`Request failed. Returned status of ${ex}`);
             DBHelper.openDatabase().then( (db) => {
                 if (!db) return;
                 let tx = db.transaction('restaurants', 'readwrite');
@@ -60,9 +61,9 @@ class DBHelper {
                 return idIndex.getAll();
             }).then((json)=>{
                 const restaurants = json;
+                callback(null, restaurants);
             });
-            const error = (`Request failed. Returned status of ${ex}`);
-            callback(error, null);
+
         });
     }
 
