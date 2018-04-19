@@ -81,7 +81,7 @@ section {
     color: #fff;
     font-size: 0.6875rem;
     letter-spacing: 1px;
-    padding: 25px;
+    padding: 10px;
     text-align: center;
     text-transform: uppercase;
 }
@@ -491,7 +491,7 @@ a.skip:hover {
         margin-top: 120px;
     }
     .inside #map-container {
-        height: calc( 100vh - 192px);
+        height: calc( 100vh - 155px);
         position: fixed;
         right: 10px;
         width: 45vw;
