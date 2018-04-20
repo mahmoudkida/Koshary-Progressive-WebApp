@@ -26,7 +26,8 @@ class DBHelper {
     static get DATABASE_URL() {
         //const port = location.port ? location.port : 8000 // Change this to your server port
         const port = 1337; //change according to gulpfile config
-        const host = location.hostname ? location.hostname : 'localhost'
+        //const host = location.hostname ? location.hostname : 'localhost';
+        const host = 'localhost';
         return `http://${host}:${port}/restaurants`;
     }
 
