@@ -66,7 +66,7 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
     //    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
     //    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
     //    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
-    image.setAttribute("alt", restaurant.name + " Restaurant Main Image");
+    image.setAttribute("alt", `${restaurant.name}Restaurant Main Image, `);
 
     const cuisine = document.getElementById('restaurant-cuisine');
     cuisine.innerHTML = restaurant.cuisine_type;
@@ -105,7 +105,7 @@ const fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hour
  */
 const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     const container = document.getElementById('reviews-container');
-    const title = document.createElement('h2');
+    const title = document.createElement('h3');
     title.innerHTML = 'Reviews';
     container.appendChild(title);
 
