@@ -36,7 +36,7 @@ gulp.task("json-server", function(){
 });
 
 //browser sync task
-gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js', 'img', 'copyfiles','json-server'], function () {
+gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js', 'img', 'copyfiles'], function () {
 
     browserSync.init({
         server: "./dist"
