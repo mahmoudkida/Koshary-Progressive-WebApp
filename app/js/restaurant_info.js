@@ -1,5 +1,15 @@
-let restaurant;
-var map;
+let restaurant, map;
+
+document.addEventListener('DOMContentLoaded', (event) => {
+
+    fetchRestaurantFromURL((error, restaurant) => {
+        if (error) { // Got an error!
+            console.error(error);
+        } else {
+            fillBreadcrumb();
+        }
+    });
+});
 
 
 /**
@@ -7,19 +17,26 @@ var map;
  */
 
 const initMap = () => {
-    fetchRestaurantFromURL((error, restaurant) => {
-        if (error) { // Got an error!
-            console.error(error);
-        } else {
-            self.map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 16,
-                center: restaurant.latlng,
-                scrollwheel: false
-            });
-            fillBreadcrumb();
-            DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-        }
-    });
+    if (!self.map) {
+        self.map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 16,
+            center: restaurant.latlng,
+            scrollwheel: false
+        });
+    }
+    document.getElementById("map-container").classList.add("show-interactive-map");
+
+    DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+}
+
+const initStaticMap = () => {
+    let latlng = `${restaurant.latlng.lat},${restaurant.latlng.lng}`,
+        zoom = 12,
+        imageConrtainer = document.getElementById("map-container");
+    let size = imageConrtainer.offsetWidth + "x" + imageConrtainer.offsetHeight;
+    let staticMapURL = `https://maps.googleapis.com/maps/api/staticmap?center=${latlng}&zoom=${zoom}&size=${size}&key=AIzaSyD7zwXocDxCO_YLSyVhDNYZDmhMxr0RcNU`;
+    staticMapURL += `&markers=${restaurant.latlng.lat},${restaurant.latlng.lng}`;
+    document.querySelector(".static-map").setAttribute("src", staticMapURL);
 }
 
 /**
@@ -42,7 +59,12 @@ const fetchRestaurantFromURL = (callback) => {
                 return;
             }
             fillRestaurantHTML();
-            callback(null, restaurant)
+            initStaticMap();
+            callback(null, restaurant);
+            //init lazy loading
+            setTimeout(function () {
+                bLazy.revalidate();
+            }, 10);
         });
     }
 }
@@ -121,10 +143,7 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     });
 
     container.appendChild(ul);
-    //init lazy loading
-    setTimeout(function () {
-        bLazy.revalidate();
-    },10);
+
 }
 
 /**

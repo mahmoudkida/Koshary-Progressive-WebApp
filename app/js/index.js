@@ -6,8 +6,8 @@ let restaurants,
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-    
-    updateRestaurants();
+
+    getAllRestaurants();
     fetchNeighborhoods();
     fetchCuisines();
 });
@@ -70,23 +70,46 @@ const fillCuisinesHTML = (cuisines = self.cuisines) => {
 /**
  * Initialize Google map, called from HTML.
  */
-function initMap(){
+function initMap() {
     let loc = {
         lat: 40.722216,
         lng: -73.987501
     };
-    self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 12,
-        center: loc,
-        scrollwheel: false
-    });
-    //set title for the map iframe for increased accessability
-//    setTimeout(function(){
-//            document.getElementById('map').getElementsByTagName("iframe")[0].setAttribute("title","Google Maps - An interactive map showing multiple restuarants' locations according to the filtered neighborhood and cuisine");
-//    },10);
-    //updateRestaurants();
+    if (!self.map) {
+        self.map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 12,
+            center: loc,
+            scrollwheel: false
+        });
+    }
+
+    document.getElementById("map-container").classList.add("show-interactive-map");
+    //set markers on the map
+    addMarkersToMap();
 }
 
+const initStaticMap = () => {
+    let latlng = "40.722216,-73.987501",
+        zoom = 12,
+        imageConrtainer = document.getElementById("map-container");
+    let size = imageConrtainer.offsetWidth + "x" + imageConrtainer.offsetHeight;
+    let staticMapURL = `https://maps.googleapis.com/maps/api/staticmap?center=${latlng}&zoom=${zoom}&size=${size}&key=AIzaSyD7zwXocDxCO_YLSyVhDNYZDmhMxr0RcNU`;
+    restaurants.forEach((restaurant) => {
+        staticMapURL += `&markers=${restaurant.latlng.lat},${restaurant.latlng.lng}` ;
+    });
+    document.querySelector(".static-map").setAttribute("src", staticMapURL);
+}
+const getAllRestaurants = () => {
+    DBHelper.fetchRestaurantByCuisineAndNeighborhood("all", "all", (error, restaurants) => {
+        if (error) { // Got an error!
+            console.error(error);
+        } else {
+            resetRestaurants(restaurants);
+            fillRestaurantsHTML();
+            initStaticMap();
+        }
+    })
+}
 /**
  * Update page and map for current restaurants.
  */
@@ -103,6 +126,7 @@ const updateRestaurants = () => {
         } else {
             resetRestaurants(restaurants);
             fillRestaurantsHTML();
+            initMap();
         }
     })
 }
@@ -131,11 +155,12 @@ const fillRestaurantsHTML = (restaurants = self.restaurants) => {
         ul.append(createRestaurantHTML(restaurant));
     });
 
-    addMarkersToMap();
+    //now we have to fill the static image first
+    //addMarkersToMap();
     //init lazy loading
     setTimeout(function () {
         bLazy.revalidate();
-    },10);
+    }, 10);
 }
 
 /**
@@ -143,13 +168,13 @@ const fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 const createRestaurantHTML = (restaurant) => {
     const li = document.createElement('li');
-    li.setAttribute("role","listitem")
+    li.setAttribute("role", "listitem")
 
     const image = document.createElement('img');
-    const imageSrc= DBHelper.imageUrlForRestaurant(restaurant);
+    const imageSrc = DBHelper.imageUrlForRestaurant(restaurant);
     image.className = 'restaurant-img b-lazy';
-    image.src="/img/placeholder-image.png";
-    image.setAttribute("data-src",`${imageSrc}`);
+    image.src = "/img/placeholder-image.png";
+    image.setAttribute("data-src", `${imageSrc}`);
     image.setAttribute("data-srcset", `/img/${restaurant.id}_300.jpg 300w,/img/${restaurant.id}.jpg 586w,/img/${restaurant.id}_800.jpg 800w`);
     image.alt = restaurant.name;
     const picture = document.createElement('picture');
@@ -163,7 +188,7 @@ const createRestaurantHTML = (restaurant) => {
     dataContainer.append(name);
 
     const neighborhood = document.createElement('p');
-    neighborhood.setAttribute("title","Neighborhood");
+    neighborhood.setAttribute("title", "Neighborhood");
     neighborhood.innerHTML = restaurant.neighborhood;
     dataContainer.append(neighborhood);
 
@@ -174,7 +199,7 @@ const createRestaurantHTML = (restaurant) => {
     const more = document.createElement('a');
     more.innerHTML = 'View Details';
     more.classList.add("more");
-    more.setAttribute("role","button");
+    more.setAttribute("role", "button");
     more.href = DBHelper.urlForRestaurant(restaurant);
     dataContainer.append(more)
 
@@ -196,12 +221,12 @@ const addMarkersToMap = (restaurants = self.restaurants) => {
 }
 
 /*change aria expanded value*/
-const changeAriaValue = (that) =>{
-    that.getAttribute("aria-expanded") == "true" ? that.setAttribute("aria-expanded","false"):that.setAttribute("aria-expanded","true");
+const changeAriaValue = (that) => {
+    that.getAttribute("aria-expanded") == "true" ? that.setAttribute("aria-expanded", "false") : that.setAttribute("aria-expanded", "true");
 }
 
 
 
-    const bLazy = new Blazy({
-        // Options
-    });
+const bLazy = new Blazy({
+    // Options
+});
