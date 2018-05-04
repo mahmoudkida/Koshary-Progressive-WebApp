@@ -39,7 +39,11 @@ gulp.task("json-server", function(){
 gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js', 'img', 'copyfiles'], function () {
 
     browserSync.init({
-        server: "./dist"
+        server: "./dist",
+//        https: {
+//            key: "wshwsh.key",
+//            cert: "wshwsh.com.crt"
+//        }
     });
 
     gulp.watch("app/scss/*.scss", ['sass']);
@@ -57,7 +61,7 @@ gulp.task('sass', function () {
         .pipe(autoprefixer({
             browsers: ['last 2 versions'],
         }))
-        .pipe(concat('main.css'))
+        //.pipe(concat('main.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest("dist/css"))
         .pipe(browserSync.stream());

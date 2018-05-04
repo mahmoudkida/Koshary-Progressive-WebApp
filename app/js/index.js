@@ -1,13 +1,13 @@
 let restaurants,
     neighborhoods,
-    cuisines
-var map
-var markers = []
+    cuisines, map, markers = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
+    
+    updateRestaurants();
     fetchNeighborhoods();
     fetchCuisines();
 });
@@ -84,7 +84,7 @@ function initMap(){
 //    setTimeout(function(){
 //            document.getElementById('map').getElementsByTagName("iframe")[0].setAttribute("title","Google Maps - An interactive map showing multiple restuarants' locations according to the filtered neighborhood and cuisine");
 //    },10);
-    updateRestaurants();
+    //updateRestaurants();
 }
 
 /**
@@ -93,12 +93,9 @@ function initMap(){
 const updateRestaurants = () => {
     const cSelect = document.getElementById('cuisines-select');
     const nSelect = document.getElementById('neighborhoods-select');
-
-    const cIndex = cSelect.selectedIndex;
-    const nIndex = nSelect.selectedIndex;
-
-    const cuisine = cSelect[cIndex].value;
-    const neighborhood = nSelect[nIndex].value;
+    //get slected option value
+    const cuisine = cSelect[cSelect.selectedIndex].value;
+    const neighborhood = nSelect[nSelect.selectedIndex].value;
 
     DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
         if (error) { // Got an error!
@@ -154,10 +151,6 @@ const createRestaurantHTML = (restaurant) => {
     image.src="/img/placeholder-image.png";
     image.setAttribute("data-src",`${imageSrc}`);
     image.setAttribute("data-srcset", `/img/${restaurant.id}_300.jpg 300w,/img/${restaurant.id}.jpg 586w,/img/${restaurant.id}_800.jpg 800w`);
-
-//    image.setAttribute("data-src-small",`img/${restaurant.id}_300.jpg`);
-//    image.setAttribute("data-src-medium",`img/${restaurant.id}_580.jpg`);
-//    image.setAttribute("data-src-large",`img/${restaurant.id}_800.jpg`);
     image.alt = restaurant.name;
     const picture = document.createElement('picture');
     picture.append(image);

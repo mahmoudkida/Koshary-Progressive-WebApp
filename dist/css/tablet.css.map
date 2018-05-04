@@ -1,0 +1,1 @@
+{"version":3,"sources":["tablet.scss"],"names":[],"mappings":"AAAE,qBACM,wBACA,kBACA,gBAAiB,CACpB","file":"tablet.css","sourcesContent":["  #restaurants-list li {\r\n        width: calc( 50% - 20px);\r\n        margin-right: 10px;\r\n        margin-left: 10px;\r\n    }"]}

@@ -5,10 +5,10 @@ var allCaches = [
   contentImgsCache
 ];
 //files names
-const cssFiles = ['main'];
+const cssFiles = ['mobile','tablet','desktop'];
 const dataFiles = ['restaurants'];
 const imgFiles = [1,2,3,4,5,6,7,8,9,10];
-const jsFiles = ['main'];
+const jsFiles = ['index','restaurant_info','vendor'];
 const htmlFiles = ['index', 'restaurant'];
 
 self.addEventListener('install', function(event) {
