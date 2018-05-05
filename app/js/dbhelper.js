@@ -28,21 +28,21 @@ class DBHelper {
         const port = 1337; //change according to gulpfile config
         //const host = location.hostname ? location.hostname : 'localhost';
         const host = 'localhost';
-        return `http://${host}:${port}/restaurants`;
+        return `http://${host}:${port}`;
     }
 
     /**
      * Fetch all restaurants.
      */
     static fetchRestaurants(callback) {
-        fetch(DBHelper.DATABASE_URL).then((response) => {
+        fetch(DBHelper.DATABASE_URL + '/restaurants').then((response) => {
             return response.json();
         }).then((json) => {
 
             //add restuarants object array into a variable
             const restaurants = json;
             //open indexdb to cach all restaurants data
-            DBHelper.openDatabase().then( (db) => {
+            DBHelper.openDatabase().then((db) => {
                 if (!db) return;
                 let tx = db.transaction('restaurants', 'readwrite');
                 let store = tx.objectStore('restaurants');
@@ -54,13 +54,13 @@ class DBHelper {
 
         }).catch((ex) => {
             const error = (`Request failed. Returned status of ${ex}`);
-            DBHelper.openDatabase().then( (db) => {
+            DBHelper.openDatabase().then((db) => {
                 if (!db) return;
                 let tx = db.transaction('restaurants', 'readwrite');
                 let store = tx.objectStore('restaurants');
                 let idIndex = store.index("id");
                 return idIndex.getAll();
-            }).then((json)=>{
+            }).then((json) => {
                 const restaurants = json;
                 callback(null, restaurants);
             });
@@ -72,19 +72,58 @@ class DBHelper {
      * Fetch a restaurant by its ID.
      */
     static fetchRestaurantById(id, callback) {
-        // fetch all restaurants with proper error handling.
-        DBHelper.fetchRestaurants((error, restaurants) => {
+        fetch(DBHelper.DATABASE_URL + '/restaurants/' + id).then((response) => {
+            return response.json();
+        }).then((json) => {
+
+            //add restuarants object array into a variable
+            const restaurant = json;
+            callback(null, restaurant);
+
+        }).catch((ex) => {
+            const error = (`Request failed. Returned status of ${ex}`);
+            DBHelper.openDatabase().then((db) => {
+                if (!db) return;
+                let tx = db.transaction('restaurants', 'readwrite');
+                let store = tx.objectStore('restaurants');
+                let idIndex = store.index("id");
+                return idIndex.get(id);
+            }).then((json) => {
+                const restaurant = json;
+                callback(null, restaurant);
+            });
+
+        });
+    }
+
+
+    /**
+     * Fetch a restaurant by its ID.
+     */
+    static toggleRestaurantFavorite(id, callback) {
+        DBHelper.fetchRestaurantById(id, function (error, restaurant) {
             if (error) {
                 callback(error, null);
             } else {
-                const restaurant = restaurants.find(r => r.id == id);
-                if (restaurant) { // Got the restaurant
-                    callback(null, restaurant);
-                } else { // Restaurant does not exist in the database
-                    callback('Restaurant does not exist', null);
-                }
+                //send to option the opposite of what is currently set
+                fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' +
+                    (restaurant.is_favorite == "false"  ? "true" : "false"), {
+                        method: 'POST'
+                    }).then((response) => {
+                    return response.json();
+                }).then((response) => {
+                    DBHelper.openDatabase().then((db) => {
+                        if (!db) return;
+                        let tx = db.transaction('restaurants', 'readwrite');
+                        let store = tx.objectStore('restaurants');
+                        store.put(response);
+                         return tx.complete;
+                    });
+                    callback(null, response);
+                });
             }
-        });
+
+        })
     }
 
     /**

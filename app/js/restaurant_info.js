@@ -74,6 +74,24 @@ const fetchRestaurantFromURL = (callback) => {
 const fillRestaurantHTML = (restaurant = self.restaurant) => {
     const name = document.getElementById('restaurant-name');
     name.innerHTML = restaurant.name;
+    
+    //create favorite button
+    const addTofavoriteButton = document.createElement("button");
+    addTofavoriteButton.classList.add("add-tofavorite");
+    if(restaurant.is_favorite == "true" || restaurant.is_favorite == true){
+        addTofavoriteButton.classList.add("favorite");
+        addTofavoriteButton.innerHTML = '<span>★</span> Favorited';
+        addTofavoriteButton.title = "Click to remove from favorite";
+    }
+    else{
+         addTofavoriteButton.innerHTML = '<span>☆</span> Add To Favorite';
+    }
+    addTofavoriteButton.setAttribute("role", "button");
+    addTofavoriteButton.setAttribute("onclick","addRestaurantToFavorite(this)");
+    addTofavoriteButton.dataset.restaurantId = restaurant.id;
+    name.append(addTofavoriteButton);
+    
+    
 
     const address = document.getElementById('restaurant-address');
     address.innerHTML = restaurant.address;
@@ -120,6 +138,24 @@ const fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hour
 
         hours.appendChild(row);
     }
+}
+
+
+/**
+ * Add retaurant to favorite.
+ */
+const addRestaurantToFavorite = (btn) =>{
+    DBHelper.toggleRestaurantFavorite(btn.dataset['restaurantId'],function(error,response){
+        if(error) alert(error);
+        if(response.is_favorite == "false"){
+            btn.classList.remove("favorite");
+            btn.innerHTML = '<span>☆</span> Add To Favorite';
+        }else{
+            btn.innerHTML = '<span>★</span> Favorited';
+            btn.title = "Click to remove from favorite";
+            btn.classList.add("favorite");
+        }
+    });
 }
 
 /**

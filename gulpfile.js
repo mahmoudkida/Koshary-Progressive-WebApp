@@ -79,7 +79,7 @@ gulp.task('index-js', function () {
             presets: ['env']
         }))
         .pipe(concat('index.js'))
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
         .pipe(browserSync.stream());
