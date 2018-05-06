@@ -95,7 +95,7 @@ gulp.task('restaurent-detail-js', function () {
             presets: ['env']
         }))
         .pipe(concat('restaurant_info.js'))
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
         .pipe(browserSync.stream());

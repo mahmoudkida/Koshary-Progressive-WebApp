@@ -214,6 +214,35 @@ class DBHelper {
             }
         });
     }
+    /**
+     * get a review on a restaurant
+     */
+    static fetchRestaurantReview (restaurantId,callback){
+        fetch(DBHelper.DATABASE_URL + '/reviews').then((response) =>{
+            return response.json();
+        }).then((reviews) =>{
+            const restraintReviewArray = reviews.filter((review, i) => review["restaurant_id"] == restaurantId)
+
+            callback(null,restraintReviewArray);
+        }).catch((error) =>{
+            callback(error,null)
+        });
+    }
+    
+    /**
+     * post a review on a restaurant
+     */
+    static postRestaurantReview (review,callback){
+        fetch(DBHelper.DATABASE_URL + '/reviews',{
+            method : "POST",
+            body : review,
+        }).then((response) => {
+            response.json();
+        }).then((json) =>{
+            callback(null,json);
+        })
+    }
+    
 
     /**
      * Restaurant page URL.

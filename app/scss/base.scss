@@ -379,6 +379,8 @@ a.skip:hover {
         }
         h3 {
             margin-bottom: 10px;
+            display: inline-block;
+            margin-right: 10px;
         }
     }
 }
@@ -401,38 +403,39 @@ a.skip:hover {
     }
 }
 
-#map-container{
+#map-container {
     min-height: 250px;
     position: relative;
-    &:after{
+    &:after {
         content: "Click or Tap on the image to load the interactive map";
         display: inline-block;
         position: absolute;
         top: 0;
         right: 0;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0, 0, 0, 0.4);
         padding: 5px;
         font-size: 12px;
         color: #fff;
     }
-    #map{
+    #map {
         display: none;
     }
-    .static-map{
+    .static-map {
         display: inline-block;
         width: 100%;
         height: 100%;
     }
-    &.show-interactive-map{
-        .static-map{
+    &.show-interactive-map {
+        .static-map {
             display: none;
         }
-        #map{
+        #map {
             display: block;
         }
     }
 }
-.add-tofavorite{
+
+.add-tofavorite {
     border: none;
     color: #fff;
     display: inline-block;
@@ -446,11 +449,54 @@ a.skip:hover {
     background: linear-gradient(to bottom, #8c8c8c 0%, #949494 100%);
     outline: none;
     cursor: pointer;
-    &.favorite{
+    &.favorite {
         background: linear-gradient(to bottom, #D7A34F 0%, #996229 100%);
 
     }
-    h2 &{
+    h2 & {
         float: right;
+    }
+}
+
+#review-container {
+    input,
+    textarea {
+        box-sizing: border-box;
+        padding: 12px 23px 12px 15px;
+        border: 2px solid rgba(0, 0, 0, .12);
+        width: 100%;
+        margin-bottom: 15px;
+        resize: vertical;
+    }
+    [type="submit"] {
+        -webkit-appearance: button;
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 20px;
+        padding: 13px 35px;
+        letter-spacing: 1px;
+        outline: 0;
+        color: #252525;
+        vertical-align: middle;
+        font-weight: 700;
+        font-size: 12px;
+        line-height: 100%;
+        cursor: pointer;
+        zoom: 1;
+        border: 1px solid #252525;
+        background-color: transparent;
+        border-radius: 2px;
+        transition: color .2s ease-in-out, background .2s ease-in-out, border .2s ease-in-out;
+        &:hover {
+            background-color: #252525;
+            color: #fff;
+        }
+    }
+    fieldset {
+        border-radius: 10px;
+        legend {
+            padding: 15px;
+            font-size: 1.2rem
+        }
     }
 }

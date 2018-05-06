@@ -314,6 +314,42 @@ var DBHelper = function () {
                 }
             });
         }
+        /**
+         * get a review on a restaurant
+         */
+
+    }, {
+        key: 'fetchRestaurantReview',
+        value: function fetchRestaurantReview(restaurantId, callback) {
+            fetch(DBHelper.DATABASE_URL + '/reviews').then(function (response) {
+                return response.json();
+            }).then(function (reviews) {
+                var restraintReviewArray = reviews.filter(function (review, i) {
+                    return review["restaurant_id"] == restaurantId;
+                });
+
+                callback(null, restraintReviewArray);
+            }).catch(function (error) {
+                callback(error, null);
+            });
+        }
+
+        /**
+         * post a review on a restaurant
+         */
+
+    }, {
+        key: 'postRestaurantReview',
+        value: function postRestaurantReview(review, callback) {
+            fetch(DBHelper.DATABASE_URL + '/reviews', {
+                method: "POST",
+                body: review
+            }).then(function (response) {
+                response.json();
+            }).then(function (json) {
+                callback(null, json);
+            });
+        }
 
         /**
          * Restaurant page URL.

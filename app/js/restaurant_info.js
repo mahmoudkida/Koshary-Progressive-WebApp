@@ -74,24 +74,23 @@ const fetchRestaurantFromURL = (callback) => {
 const fillRestaurantHTML = (restaurant = self.restaurant) => {
     const name = document.getElementById('restaurant-name');
     name.innerHTML = restaurant.name;
-    
+
     //create favorite button
     const addTofavoriteButton = document.createElement("button");
     addTofavoriteButton.classList.add("add-tofavorite");
-    if(restaurant.is_favorite == "true" || restaurant.is_favorite == true){
+    if (restaurant.is_favorite == "true" || restaurant.is_favorite == true) {
         addTofavoriteButton.classList.add("favorite");
         addTofavoriteButton.innerHTML = '<span>★</span> Favorited';
         addTofavoriteButton.title = "Click to remove from favorite";
-    }
-    else{
-         addTofavoriteButton.innerHTML = '<span>☆</span> Add To Favorite';
+    } else {
+        addTofavoriteButton.innerHTML = '<span>☆</span> Add To Favorite';
     }
     addTofavoriteButton.setAttribute("role", "button");
-    addTofavoriteButton.setAttribute("onclick","addRestaurantToFavorite(this)");
+    addTofavoriteButton.setAttribute("onclick", "addRestaurantToFavorite(this)");
     addTofavoriteButton.dataset.restaurantId = restaurant.id;
     name.append(addTofavoriteButton);
-    
-    
+
+
 
     const address = document.getElementById('restaurant-address');
     address.innerHTML = restaurant.address;
@@ -116,7 +115,12 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
         fillRestaurantHoursHTML();
     }
     // fill reviews
-    fillReviewsHTML();
+    DBHelper.fetchRestaurantReview(restaurant.id, (error, reviews) => {
+        if (error) return alert(error);
+        self.restaurant.reviews = reviews;
+        fillReviewsHTML();
+    })
+
 }
 
 /**
@@ -142,15 +146,15 @@ const fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hour
 
 
 /**
- * Add retaurant to favorite.
+ * Add - Remove retaurant to favorite.
  */
-const addRestaurantToFavorite = (btn) =>{
-    DBHelper.toggleRestaurantFavorite(btn.dataset['restaurantId'],function(error,response){
-        if(error) alert(error);
-        if(response.is_favorite == "false"){
+const addRestaurantToFavorite = (btn) => {
+    DBHelper.toggleRestaurantFavorite(btn.dataset['restaurantId'], function (error, response) {
+        if (error) alert(error);
+        if (response.is_favorite == "false") {
             btn.classList.remove("favorite");
             btn.innerHTML = '<span>☆</span> Add To Favorite';
-        }else{
+        } else {
             btn.innerHTML = '<span>★</span> Favorited';
             btn.title = "Click to remove from favorite";
             btn.classList.add("favorite");
@@ -159,10 +163,51 @@ const addRestaurantToFavorite = (btn) =>{
 }
 
 /**
+ * Add review to a restaurant
+ */
+const submitRetaurantReview = (evt, restaurant = self.restaurant) => {
+    //reset the error container
+    document.getElementById("form-error-list").innerHTML = "";
+    let reviewForm = document.getElementsByName("restaurant-review-form")[0],
+        reviewBody = {};
+    //check if there is any missing text
+    if (reviewForm.elements["user_name"].value == "") {
+        document.getElementById("form-error-list").append(document.createElement("li").innerHTML("Please fill your name"))
+        return false;
+    }
+    if (reviewForm.elements["rating"].value == "") {
+        document.getElementById("form-error-list").append(document.createElement("li").innerHTML("Please fill the rating"))
+        return false;
+    }
+    if (reviewForm.elements["comments"].value == "") {
+        document.getElementById("form-error-list").append(document.createElement("li").innerHTML("Please fill your comment"))
+        return false;
+    }
+    reviewBody = {
+        restaurant_id: restaurant.id,
+        name: reviewForm.elements["user_name"].value,
+        rating: reviewForm.elements["rating"].value,
+        comments: reviewForm.elements["comments"].value,
+        date: new Date()
+    };
+
+    DBHelper.postRestaurantReview(reviewBody, function (error, response) {
+        if (error) return alert(error);
+        if (!self.restaurant.reviews) {
+            self.restaurant.reviews = [];
+        }
+        self.restaurant.reviews.push(reviewBody);
+        fillReviewsHTML();
+        reviewForm.reset();
+    })
+    return true;
+}
+/**
  * Create all reviews HTML and add them to the webpage.
  */
 const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     const container = document.getElementById('reviews-container');
+    container.innerHTML = '';
     const title = document.createElement('h3');
     title.innerHTML = 'Reviews';
     container.appendChild(title);
@@ -173,7 +218,9 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
         container.appendChild(noReviews);
         return;
     }
-    const ul = document.getElementById('reviews-list');
+    const ul = document.createElement('ul');
+    ul.setAttribute("id", "reviews-list");
+    ul.setAttribute("role", "list");
     reviews.forEach(review => {
         ul.appendChild(createReviewHTML(review));
     });
@@ -193,10 +240,13 @@ const createReviewHTML = (review) => {
     name.innerHTML = review.name;
     li.appendChild(name);
 
-    const date = document.createElement('date');
-    date.innerHTML = review.date;
-    date.setAttribute("datetime", review.date)
-    li.appendChild(date);
+    if (review.createdAt) {
+        const date = document.createElement('date');
+        date.innerHTML = timeConverter(review.createdAt);
+        date.setAttribute("datetime", review.date)
+        li.appendChild(date);
+    }
+
 
     const rating = document.createElement('p');
     rating.setAttribute("title", "1 to 5 rating");
@@ -238,6 +288,19 @@ const getParameterByName = (name, url) => {
 }
 
 
+
+const timeConverter = (UNIX_timestamp) => {
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var year = a.getYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + hour + ':' + min + ':' + sec;
+    return time;
+}
 const bLazy = new Blazy({
     // Options
 });
