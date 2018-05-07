@@ -89,7 +89,7 @@ self.addEventListener('fetch', function (event) {
             self.clients.get(event.clientId).then(function (client) {
                 client.postMessage({
                     message: "Post unsuccessful.",
-                    request: event.request // A string we instantiated earlier
+                    request: event.request.clone() // A string we instantiated earlier
                 });
                 // Respond with the page that the request originated from
                 return;

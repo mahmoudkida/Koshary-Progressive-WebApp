@@ -24,32 +24,32 @@ const useref = require('gulp-useref');
 const jsonServer = require("gulp-json-srv");
 
 const server = jsonServer.create({
-	port: 3005,
-	id:   '_id',
+    port: 3005,
+    id: '_id',
 });
 
 
 
-gulp.task("json-server", function(){
+gulp.task("json-server", function () {
     return gulp.src("data/restaurants.json")
         .pipe(server.pipe());
 });
 
 //browser sync task
-gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js', 'img', 'copyfiles'], function () {
+gulp.task('serve', ['html', 'sass', 'index-js', 'restaurent-detail-js', 'vendor-js', 'img', 'copyfiles'], function () {
 
     browserSync.init({
         server: "./dist",
-//        https: {
-//            key: "wshwsh.key",
-//            cert: "wshwsh.com.crt"
-//        }
+        //        https: {
+        //            key: "wshwsh.key",
+        //            cert: "wshwsh.com.crt"
+        //        }
     });
 
     gulp.watch("app/scss/*.scss", ['sass']);
-    gulp.watch("app/js/*.js", ['index-js','restaurent-detail-js','vendor-js']);
-    gulp.watch("app/*.html",['html']).on('change', browserSync.reload);
-    gulp.watch("'sw.js'",["copyfiles"]);
+    gulp.watch("app/js/*.js", ['index-js', 'restaurent-detail-js', 'vendor-js']);
+    gulp.watch("app/*.html", ['html']).on('change', browserSync.reload);
+    gulp.watch("'sw.js'", ["copyfiles"]);
 });
 
 // Compile sass into CSS & auto-inject into browsers
@@ -71,9 +71,10 @@ gulp.task('sass', function () {
 // process JS files and return the stream.
 gulp.task('index-js', function () {
     return gulp.src([
-                    'app/js/swhelper.js',
                     'app/js/indexdbhelper.js',
                      'app/js/dbhelper.js',
+                    'app/js/swhelper.js',
+
                      'app/js/index.js',
                     ])
         .pipe(sourcemaps.init())
@@ -81,16 +82,16 @@ gulp.task('index-js', function () {
             presets: ['env']
         }))
         .pipe(concat('index.js'))
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
         .pipe(browserSync.stream());
 });
 gulp.task('restaurent-detail-js', function () {
     return gulp.src([
-                    'app/js/swhelper.js',
-                    'app/js/indexdbhelper.js',
+        'app/js/indexdbhelper.js',
                      'app/js/dbhelper.js',
+                    'app/js/swhelper.js',
                      'app/js/restaurant_info.js'
                     ])
         .pipe(sourcemaps.init())
@@ -98,7 +99,7 @@ gulp.task('restaurent-detail-js', function () {
             presets: ['env']
         }))
         .pipe(concat('restaurant_info.js'))
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/js'))
         .pipe(browserSync.stream());

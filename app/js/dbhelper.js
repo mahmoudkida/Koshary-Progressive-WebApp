@@ -56,7 +56,7 @@ class DBHelper {
     /**
      * Fetch a restaurant by its ID.
      */
-    static toggleRestaurantFavorite(id, callback) {
+    static toggleRestaurantFavorite(id, callback, storeForOffline = true) {
         DBHelper.fetchRestaurantById(id, function (error, restaurant) {
             if (error) {
                 callback(error, null);
@@ -65,8 +65,8 @@ class DBHelper {
                 //send to option the opposite of what is currently set
                 restaurant.is_favorite = (restaurant.is_favorite == "false" ? "true" : "false");
                 fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' + restaurant.is_favorite, {
-                        method: 'POST'
-                    }).then((response) => {
+                    method: 'POST'
+                }).then((response) => {
                     return response.json();
                 }).then((restaurant) => {
                     IndexDBHelper.toggleRestaurantFavorite(restaurant);
@@ -75,7 +75,10 @@ class DBHelper {
                     // TODO: add offline favorite to indexdb
                     const error = (`Request failed. Returned status of ${ex}`);
                     //get response from index db if available
-                    IndexDBHelper.postFavoriteOffline(restaurant, callback);
+                    if (storeForOffline) { //if false it mean that it's an attempt to save offline favorite so there is no need to cach it again
+                        IndexDBHelper.toggleRestaurantFavorite(restaurant);
+                        IndexDBHelper.postFavoriteOffline(restaurant, callback);
+                    }
                 });
             }
 
@@ -193,7 +196,7 @@ class DBHelper {
      * post a review on a restaurant
      */
 
-    static postRestaurantReview(review, callback) {
+    static postRestaurantReview(review, callback, storeForOffline = true) {
         fetch(DBHelper.DATABASE_URL + '/reviews', {
             method: "POST",
             body: review,
@@ -201,12 +204,16 @@ class DBHelper {
             return response.json();
         }).then((addedReview) => {
             //cach reviews in indexdb
-            review = Object.assign(addedReview,review);
+            review = Object.assign(addedReview, review);
             IndexDBHelper.postReview(review);
             callback(null, review);
         }).catch((ex) => {
             const error = (`Request failed. Returned status of ${ex}`);
-            IndexDBHelper.postReviewOffline(review, callback);
+            if (storeForOffline) {//if this token is false it means it's an attempt to submit offline review
+                IndexDBHelper.postReview(review);
+                IndexDBHelper.postReviewOffline(review, callback);
+
+            }
         });
     }
 

@@ -1,6 +1,8 @@
 /**
  * indexdb helper.
  */
+
+
 class IndexDBHelper {
     static openDatabase() {
         // If the browser doesn't support service worker,
@@ -22,9 +24,14 @@ class IndexDBHelper {
                     });
                     reviewStore.createIndex('id', 'id');
                 case 2:
-                    let offlineReview = upgradeDb.createObjectStore('offline-reviews',{ keyPath: "id", autoIncrement: true });
+                    let offlineReview = upgradeDb.createObjectStore('offline-reviews', {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
                 case 3:
-                    let offlineRestaurantFavorite = upgradeDb.createObjectStore('offline-favorite',{ keyPath: "id", autoIncrement: true });
+                    let offlineRestaurantFavorite = upgradeDb.createObjectStore('offline-favorite', {
+                        keyPath: "id"
+                    });
             }
 
         });
@@ -41,7 +48,7 @@ class IndexDBHelper {
             });
             tx.complete;
         }).then(() => {
-            callback(null,restaurants);
+            callback(null, restaurants);
         });
     }
 
@@ -61,12 +68,11 @@ class IndexDBHelper {
             if (!db) return;
             let tx = db.transaction('restaurants', 'readwrite');
             let store = tx.objectStore('restaurants');
-             let idIndex = store.index("id");
-            return idIndex.getAll(); 
+            let idIndex = store.index("id");
+            return idIndex.getAll();
         }).then((restaurants) => {
             let restaurant = restaurants.find((restaurant, i) => restaurant.id == id);
-            restaurant = restaurant[0];
-            callback(null,restaurant);
+            callback(null, restaurant);
         });
 
     }
@@ -78,8 +84,8 @@ class IndexDBHelper {
             let store = tx.objectStore('restaurants');
             store.put(restaurant);
             return tx.complete;
-        }).then(()=>{
-             callback(null, restaurant);
+        }).then(() => {
+            callback(null, restaurant);
         });
     }
 
@@ -127,7 +133,7 @@ class IndexDBHelper {
             store.put(review);
             return tx.complete;
         }).then(() => {
-            callback(null,review);
+            callback(null, review);
         });
     }
 
@@ -142,7 +148,28 @@ class IndexDBHelper {
             callback(null, review);
         });
     }
-    
+
+    static fetchReviewOffline(callback) {
+        IndexDBHelper.openDatabase().then((db) => {
+            if (!db) return;
+            let tx = db.transaction('offline-reviews', 'readwrite');
+            let store = tx.objectStore('offline-reviews');
+            return store.getAll();
+        }).then((offlineReviews) => {
+            callback(null, offlineReviews);
+        });
+    }
+
+    static deleteReviewOffline(ReviewId, callback = () => {}) {
+        IndexDBHelper.openDatabase().then((db) => {
+            if (!db) return;
+            let tx = db.transaction('offline-reviews', 'readwrite');
+            let store = tx.objectStore('offline-reviews');
+            return store.delete(ReviewId);
+        }).then(() => {
+            callback(null);
+        });
+    }
     static postFavoriteOffline(restaurant, callback = () => {}) {
         IndexDBHelper.openDatabase().then((db) => {
             if (!db) return;
@@ -154,4 +181,44 @@ class IndexDBHelper {
             callback(null, restaurant);
         });
     }
+    static fetchFavoriteOffline(callback) {
+        IndexDBHelper.openDatabase().then((db) => {
+            if (!db) return;
+            let tx = db.transaction('offline-favorite', 'readwrite');
+            let store = tx.objectStore('offline-favorite');
+            return store.getAll();
+        }).then((offlineFavorites) => {
+            callback(null, offlineFavorites);
+        });
+    }
+    static deleteFavoriteOffline(favoriteRestaurantId, callback = () => {}) {
+        IndexDBHelper.openDatabase().then((db) => {
+            if (!db) return;
+            let tx = db.transaction('offline-favorite', 'readwrite');
+            let store = tx.objectStore('offline-favorite');
+            return store.delete(favoriteRestaurantId);
+        }).then(() => {
+            callback(null);
+        });
+    }
 }
+
+
+//try to submit offline reviews and favorite
+IndexDBHelper.fetchReviewOffline((error, reviews) => {
+    reviews.forEach((review) => {
+        let reviewId = review.id;
+        delete review.id;
+        DBHelper.postRestaurantReview(review, (error, review) => {
+            IndexDBHelper.deleteReviewOffline(reviewId);
+        }, false);
+    });
+});
+
+IndexDBHelper.fetchFavoriteOffline((error, favoriteRestaurants) => {
+    favoriteRestaurants.forEach((favoriteRestaurant) => {
+        DBHelper.toggleRestaurantFavorite(favoriteRestaurant.id, (error, favoriteRestaurant) => {
+            IndexDBHelper.deleteFavoriteOffline(favoriteRestaurant.id)
+        }, false);
+    });
+});
