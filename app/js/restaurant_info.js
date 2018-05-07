@@ -98,7 +98,7 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
     const image = document.getElementById('restaurant-img');
     image.className = 'restaurant-img b-lazy';
     //image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.src = "/img/placeholder-image.png";
+    image.src = "/img/placeholder-image.jpg";
     image.setAttribute("data-src", `${DBHelper.imageUrlForRestaurant(restaurant)}`);
     image.setAttribute("data-srcset", `/img/${restaurant.id}_300.jpg 300w,/img/${restaurant.id}.jpg 586w,/img/${restaurant.id}_800.jpg 800w`);
 
@@ -196,7 +196,7 @@ const submitRetaurantReview = (evt, restaurant = self.restaurant) => {
         if (!self.restaurant.reviews) {
             self.restaurant.reviews = [];
         }
-        self.restaurant.reviews.push(reviewBody);
+        self.restaurant.reviews.unshift(reviewBody);
         fillReviewsHTML();
         reviewForm.reset();
     })

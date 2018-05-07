@@ -49,6 +49,7 @@ gulp.task('serve', ['html', 'sass', 'index-js','restaurent-detail-js','vendor-js
     gulp.watch("app/scss/*.scss", ['sass']);
     gulp.watch("app/js/*.js", ['index-js','restaurent-detail-js','vendor-js']);
     gulp.watch("app/*.html",['html']).on('change', browserSync.reload);
+    gulp.watch("'sw.js'",["copyfiles"]);
 });
 
 // Compile sass into CSS & auto-inject into browsers
@@ -71,6 +72,7 @@ gulp.task('sass', function () {
 gulp.task('index-js', function () {
     return gulp.src([
                     'app/js/swhelper.js',
+                    'app/js/indexdbhelper.js',
                      'app/js/dbhelper.js',
                      'app/js/index.js',
                     ])
@@ -87,6 +89,7 @@ gulp.task('index-js', function () {
 gulp.task('restaurent-detail-js', function () {
     return gulp.src([
                     'app/js/swhelper.js',
+                    'app/js/indexdbhelper.js',
                      'app/js/dbhelper.js',
                      'app/js/restaurant_info.js'
                     ])

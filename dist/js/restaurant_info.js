@@ -1,64 +1,265 @@
 'use strict';
 
 function IndexController() {
-  this._registerServiceWorker();
+    this._registerServiceWorker();
 }
 
 IndexController.prototype._registerServiceWorker = function () {
-  if (!navigator.serviceWorker) return;
+    if (!navigator.serviceWorker) return;
 
-  var indexController = this;
+    var indexController = this;
 
-  navigator.serviceWorker.register('sw.js').then(function (reg) {
-    if (!navigator.serviceWorker.controller) {
-      return;
-    }
+    navigator.serviceWorker.register('sw.js').then(function (reg) {
+        if (!navigator.serviceWorker.controller) {
+            return;
+        }
 
-    if (reg.waiting) {
-      indexController._updateReady(reg.waiting);
-      return;
-    }
+        if (reg.waiting) {
+            indexController._updateReady(reg.waiting);
+            return;
+        }
 
-    if (reg.installing) {
-      indexController._trackInstalling(reg.installing);
-      return;
-    }
+        if (reg.installing) {
+            indexController._trackInstalling(reg.installing);
+            return;
+        }
 
-    reg.addEventListener('updatefound', function () {
-      indexController._trackInstalling(reg.installing);
+        reg.addEventListener('updatefound', function () {
+            indexController._trackInstalling(reg.installing);
+        });
     });
-  });
 
-  // Ensure refresh is only called once.
-  // This works around a bug in "force update on reload".
-  var refreshing;
-  navigator.serviceWorker.addEventListener('controllerchange', function () {
-    if (refreshing) return;
-    window.location.reload();
-    refreshing = true;
-  });
+    // Ensure refresh is only called once.
+    // This works around a bug in "force update on reload".
+    var refreshing;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (refreshing) return;
+        window.location.reload();
+        refreshing = true;
+    });
+    navigator.serviceWorker.addEventListener('message', function (event) {
+        console.log(event.data.msg, event.data.url);
+    });
 };
 
 IndexController.prototype._trackInstalling = function (worker) {
-  var indexController = this;
-  worker.addEventListener('statechange', function () {
-    if (worker.state == 'installed') {
-      indexController._updateReady(worker);
-    }
-  });
+    var indexController = this;
+    worker.addEventListener('statechange', function () {
+        if (worker.state == 'installed') {
+            indexController._updateReady(worker);
+        }
+    });
 };
 
 IndexController.prototype._updateReady = function (worker) {
 
-  var toast = confirm("New version available, do you want to upate ?");
+    var toast = confirm("New version available, do you want to upate ?");
 
-  if (toast != null) {
-    worker.postMessage({ action: 'skipWaiting' });
-  }
+    if (toast != null) {
+        worker.postMessage({
+            action: 'skipWaiting'
+        });
+    }
 };
 
 //initialize sw
 var swController = new IndexController();
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * indexdb helper.
+ */
+var IndexDBHelper = function () {
+    function IndexDBHelper() {
+        _classCallCheck(this, IndexDBHelper);
+    }
+
+    _createClass(IndexDBHelper, null, [{
+        key: 'openDatabase',
+        value: function openDatabase() {
+            // If the browser doesn't support service worker,
+            // we don't care about having a database
+            if (!navigator.serviceWorker) {
+                return Promise.resolve();
+            }
+
+            return idb.open('koshary', 4, function (upgradeDb) {
+                switch (upgradeDb.oldVersion) {
+                    case 0:
+                        var restaurantStore = upgradeDb.createObjectStore('restaurants', {
+                            keyPath: 'id'
+                        });
+                        restaurantStore.createIndex('id', 'id');
+                    case 1:
+                        var reviewStore = upgradeDb.createObjectStore('reviews', {
+                            keyPath: 'id'
+                        });
+                        reviewStore.createIndex('id', 'id');
+                    case 2:
+                        var offlineReview = upgradeDb.createObjectStore('offline-reviews', { keyPath: "id", autoIncrement: true });
+                    case 3:
+                        var offlineRestaurantFavorite = upgradeDb.createObjectStore('offline-favorite', { keyPath: "id", autoIncrement: true });
+                }
+            });
+        }
+    }, {
+        key: 'storeRestaurants',
+        value: function storeRestaurants(restaurants) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('restaurants', 'readwrite');
+                var store = tx.objectStore('restaurants');
+                restaurants.forEach(function (restaurant) {
+                    store.put(restaurant);
+                });
+                tx.complete;
+            }).then(function () {
+                callback(null, restaurants);
+            });
+        }
+    }, {
+        key: 'fetchRestaurants',
+        value: function fetchRestaurants(callback) {
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('restaurants', 'readwrite');
+                var store = tx.objectStore('restaurants');
+                var idIndex = store.index("id");
+                return idIndex.getAll();
+            }).then(function (json) {
+                callback(null, json);
+            });
+        }
+    }, {
+        key: 'fetchRestaurantById',
+        value: function fetchRestaurantById(id) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('restaurants', 'readwrite');
+                var store = tx.objectStore('restaurants');
+                var idIndex = store.index("id");
+                return idIndex.getAll();
+            }).then(function (restaurants) {
+                var restaurant = restaurants.find(function (restaurant, i) {
+                    return restaurant.id == id;
+                });
+                restaurant = restaurant[0];
+                callback(null, restaurant);
+            });
+        }
+    }, {
+        key: 'toggleRestaurantFavorite',
+        value: function toggleRestaurantFavorite(restaurant) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('restaurants', 'readwrite');
+                var store = tx.objectStore('restaurants');
+                store.put(restaurant);
+                return tx.complete;
+            }).then(function () {
+                callback(null, restaurant);
+            });
+        }
+    }, {
+        key: 'storeReviews',
+        value: function storeReviews(reviews) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            //cach reviews in indexdb
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('reviews', 'readwrite');
+                var store = tx.objectStore('reviews');
+                reviews.forEach(function (review) {
+                    store.put(review);
+                });
+                return tx.complete;
+            }).then(function () {
+                callback(null, reviews);
+            });
+        }
+    }, {
+        key: 'fetchReviews',
+        value: function fetchReviews(id) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('reviews', 'readwrite');
+                var store = tx.objectStore('reviews');
+                var idIndex = store.index("id");
+                return idIndex.getAll;
+            }).then(function (reviews) {
+                var restraintReviewArray = {};
+                if (id) {
+                    restraintReviewArray = reviews.filter(function (review, i) {
+                        return review["restaurant_id"] == restaurantId;
+                    });
+                } else {
+                    restraintReviewArray = reviews;
+                }
+                callback(null, restraintReviewArray);
+            });
+        }
+    }, {
+        key: 'postReview',
+        value: function postReview(review) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('reviews', 'readwrite');
+                var store = tx.objectStore('reviews');
+                store.put(review);
+                return tx.complete;
+            }).then(function () {
+                callback(null, review);
+            });
+        }
+    }, {
+        key: 'postReviewOffline',
+        value: function postReviewOffline(review) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('offline-reviews', 'readwrite');
+                var store = tx.objectStore('offline-reviews');
+                store.put(review);
+                return tx.complete;
+            }).then(function () {
+                callback(null, review);
+            });
+        }
+    }, {
+        key: 'postFavoriteOffline',
+        value: function postFavoriteOffline(restaurant) {
+            var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+
+            IndexDBHelper.openDatabase().then(function (db) {
+                if (!db) return;
+                var tx = db.transaction('offline-favorite', 'readwrite');
+                var store = tx.objectStore('offline-favorite');
+                store.put(restaurant);
+                return tx.complete;
+            }).then(function () {
+                callback(null, restaurant);
+            });
+        }
+    }]);
+
+    return IndexDBHelper;
+}();
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -74,28 +275,6 @@ var DBHelper = function () {
     }
 
     _createClass(DBHelper, null, [{
-        key: 'openDatabase',
-        value: function openDatabase() {
-            // If the browser doesn't support service worker,
-            // we don't care about having a database
-            if (!navigator.serviceWorker) {
-                return Promise.resolve();
-            }
-
-            return idb.open('koshary', 1, function (upgradeDb) {
-                var store = upgradeDb.createObjectStore('restaurants', {
-                    keyPath: 'id'
-                });
-                store.createIndex('id', 'id');
-            });
-        }
-
-        /**
-         * Database URL.
-         * Change this to restaurants.json file location on your server.
-         */
-
-    }, {
         key: 'fetchRestaurants',
 
 
@@ -105,32 +284,13 @@ var DBHelper = function () {
         value: function fetchRestaurants(callback) {
             fetch(DBHelper.DATABASE_URL + '/restaurants').then(function (response) {
                 return response.json();
-            }).then(function (json) {
-
-                //add restuarants object array into a variable
-                var restaurants = json;
+            }).then(function (restaurants) {
                 //open indexdb to cach all restaurants data
-                DBHelper.openDatabase().then(function (db) {
-                    if (!db) return;
-                    var tx = db.transaction('restaurants', 'readwrite');
-                    var store = tx.objectStore('restaurants');
-                    restaurants.forEach(function (restaurant) {
-                        store.put(restaurant);
-                    });
-                });
+                IndexDBHelper.storeRestaurants(restaurants);
                 callback(null, restaurants);
             }).catch(function (ex) {
                 var error = 'Request failed. Returned status of ' + ex;
-                DBHelper.openDatabase().then(function (db) {
-                    if (!db) return;
-                    var tx = db.transaction('restaurants', 'readwrite');
-                    var store = tx.objectStore('restaurants');
-                    var idIndex = store.index("id");
-                    return idIndex.getAll();
-                }).then(function (json) {
-                    var restaurants = json;
-                    callback(null, restaurants);
-                });
+                IndexDBHelper.fetchRestaurants(callback);
             });
         }
 
@@ -143,23 +303,13 @@ var DBHelper = function () {
         value: function fetchRestaurantById(id, callback) {
             fetch(DBHelper.DATABASE_URL + '/restaurants/' + id).then(function (response) {
                 return response.json();
-            }).then(function (json) {
+            }).then(function (restaurant) {
 
                 //add restuarants object array into a variable
-                var restaurant = json;
                 callback(null, restaurant);
             }).catch(function (ex) {
                 var error = 'Request failed. Returned status of ' + ex;
-                DBHelper.openDatabase().then(function (db) {
-                    if (!db) return;
-                    var tx = db.transaction('restaurants', 'readwrite');
-                    var store = tx.objectStore('restaurants');
-                    var idIndex = store.index("id");
-                    return idIndex.get(id);
-                }).then(function (json) {
-                    var restaurant = json;
-                    callback(null, restaurant);
-                });
+                IndexDBHelper.fetchRestaurantById(id, callback);
             });
         }
 
@@ -174,20 +324,21 @@ var DBHelper = function () {
                 if (error) {
                     callback(error, null);
                 } else {
+
                     //send to option the opposite of what is currently set
-                    fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' + (restaurant.is_favorite == "false" ? "true" : "false"), {
+                    restaurant.is_favorite = restaurant.is_favorite == "false" ? "true" : "false";
+                    fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' + restaurant.is_favorite, {
                         method: 'POST'
                     }).then(function (response) {
                         return response.json();
-                    }).then(function (response) {
-                        DBHelper.openDatabase().then(function (db) {
-                            if (!db) return;
-                            var tx = db.transaction('restaurants', 'readwrite');
-                            var store = tx.objectStore('restaurants');
-                            store.put(response);
-                            return tx.complete;
-                        });
-                        callback(null, response);
+                    }).then(function (restaurant) {
+                        IndexDBHelper.toggleRestaurantFavorite(restaurant);
+                        callback(null, restaurant);
+                    }).catch(function (ex) {
+                        // TODO: add offline favorite to indexdb
+                        var error = 'Request failed. Returned status of ' + ex;
+                        //get response from index db if available
+                        IndexDBHelper.postFavoriteOffline(restaurant, callback);
                     });
                 }
             });
@@ -328,9 +479,13 @@ var DBHelper = function () {
                     return review["restaurant_id"] == restaurantId;
                 });
 
+                IndexDBHelper.storeReviews(reviews);
+
                 callback(null, restraintReviewArray);
-            }).catch(function (error) {
-                callback(error, null);
+            }).catch(function (ex) {
+                var error = 'Request failed. Returned status of ' + ex;
+                //get response from index db if available
+                IndexDBHelper.fetchReviews(restaurantId, callback);
             });
         }
 
@@ -345,9 +500,15 @@ var DBHelper = function () {
                 method: "POST",
                 body: review
             }).then(function (response) {
-                response.json();
-            }).then(function (json) {
-                callback(null, json);
+                return response.json();
+            }).then(function (addedReview) {
+                //cach reviews in indexdb
+                review = Object.assign(addedReview, review);
+                IndexDBHelper.postReview(review);
+                callback(null, review);
+            }).catch(function (ex) {
+                var error = 'Request failed. Returned status of ' + ex;
+                IndexDBHelper.postReviewOffline(review, callback);
             });
         }
 
@@ -389,6 +550,12 @@ var DBHelper = function () {
         }
     }, {
         key: 'DATABASE_URL',
+
+
+        /**
+         * Database URL.
+         * Change this to restaurants.json file location on your server.
+         */
         get: function get() {
             //const port = location.port ? location.port : 8000 // Change this to your server port
             var port = 1337; //change according to gulpfile config
@@ -505,7 +672,7 @@ var fillRestaurantHTML = function fillRestaurantHTML() {
     var image = document.getElementById('restaurant-img');
     image.className = 'restaurant-img b-lazy';
     //image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.src = "/img/placeholder-image.png";
+    image.src = "/img/placeholder-image.jpg";
     image.setAttribute("data-src", '' + DBHelper.imageUrlForRestaurant(restaurant));
     image.setAttribute("data-srcset", '/img/' + restaurant.id + '_300.jpg 300w,/img/' + restaurant.id + '.jpg 586w,/img/' + restaurant.id + '_800.jpg 800w');
 
@@ -605,7 +772,7 @@ var submitRetaurantReview = function submitRetaurantReview(evt) {
         if (!self.restaurant.reviews) {
             self.restaurant.reviews = [];
         }
-        self.restaurant.reviews.push(reviewBody);
+        self.restaurant.reviews.unshift(reviewBody);
         fillReviewsHTML();
         reviewForm.reset();
     });

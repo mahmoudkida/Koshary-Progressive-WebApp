@@ -4,20 +4,7 @@
 class DBHelper {
 
 
-    static openDatabase() {
-        // If the browser doesn't support service worker,
-        // we don't care about having a database
-        if (!navigator.serviceWorker) {
-            return Promise.resolve();
-        }
 
-        return idb.open('koshary', 1, function (upgradeDb) {
-            var store = upgradeDb.createObjectStore('restaurants', {
-                keyPath: 'id'
-            });
-            store.createIndex('id', 'id');
-        });
-    }
 
     /**
      * Database URL.
@@ -37,34 +24,14 @@ class DBHelper {
     static fetchRestaurants(callback) {
         fetch(DBHelper.DATABASE_URL + '/restaurants').then((response) => {
             return response.json();
-        }).then((json) => {
-
-            //add restuarants object array into a variable
-            const restaurants = json;
+        }).then((restaurants) => {
             //open indexdb to cach all restaurants data
-            DBHelper.openDatabase().then((db) => {
-                if (!db) return;
-                let tx = db.transaction('restaurants', 'readwrite');
-                let store = tx.objectStore('restaurants');
-                restaurants.forEach(function (restaurant) {
-                    store.put(restaurant);
-                });
-            });
+            IndexDBHelper.storeRestaurants(restaurants);
             callback(null, restaurants);
 
         }).catch((ex) => {
             const error = (`Request failed. Returned status of ${ex}`);
-            DBHelper.openDatabase().then((db) => {
-                if (!db) return;
-                let tx = db.transaction('restaurants', 'readwrite');
-                let store = tx.objectStore('restaurants');
-                let idIndex = store.index("id");
-                return idIndex.getAll();
-            }).then((json) => {
-                const restaurants = json;
-                callback(null, restaurants);
-            });
-
+            IndexDBHelper.fetchRestaurants(callback);
         });
     }
 
@@ -74,25 +41,14 @@ class DBHelper {
     static fetchRestaurantById(id, callback) {
         fetch(DBHelper.DATABASE_URL + '/restaurants/' + id).then((response) => {
             return response.json();
-        }).then((json) => {
+        }).then((restaurant) => {
 
             //add restuarants object array into a variable
-            const restaurant = json;
             callback(null, restaurant);
 
         }).catch((ex) => {
             const error = (`Request failed. Returned status of ${ex}`);
-            DBHelper.openDatabase().then((db) => {
-                if (!db) return;
-                let tx = db.transaction('restaurants', 'readwrite');
-                let store = tx.objectStore('restaurants');
-                let idIndex = store.index("id");
-                return idIndex.get(id);
-            }).then((json) => {
-                const restaurant = json;
-                callback(null, restaurant);
-            });
-
+            IndexDBHelper.fetchRestaurantById(id, callback);
         });
     }
 
@@ -105,21 +61,21 @@ class DBHelper {
             if (error) {
                 callback(error, null);
             } else {
+
                 //send to option the opposite of what is currently set
-                fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' +
-                    (restaurant.is_favorite == "false"  ? "true" : "false"), {
+                restaurant.is_favorite = (restaurant.is_favorite == "false" ? "true" : "false");
+                fetch(DBHelper.DATABASE_URL + '/restaurants/' + id + '/?is_favorite=' + restaurant.is_favorite, {
                         method: 'POST'
                     }).then((response) => {
                     return response.json();
-                }).then((response) => {
-                    DBHelper.openDatabase().then((db) => {
-                        if (!db) return;
-                        let tx = db.transaction('restaurants', 'readwrite');
-                        let store = tx.objectStore('restaurants');
-                        store.put(response);
-                         return tx.complete;
-                    });
-                    callback(null, response);
+                }).then((restaurant) => {
+                    IndexDBHelper.toggleRestaurantFavorite(restaurant);
+                    callback(null, restaurant);
+                }).catch((ex) => {
+                    // TODO: add offline favorite to indexdb
+                    const error = (`Request failed. Returned status of ${ex}`);
+                    //get response from index db if available
+                    IndexDBHelper.postFavoriteOffline(restaurant, callback);
                 });
             }
 
@@ -217,32 +173,43 @@ class DBHelper {
     /**
      * get a review on a restaurant
      */
-    static fetchRestaurantReview (restaurantId,callback){
-        fetch(DBHelper.DATABASE_URL + '/reviews').then((response) =>{
+    static fetchRestaurantReview(restaurantId, callback) {
+        fetch(DBHelper.DATABASE_URL + '/reviews').then((response) => {
             return response.json();
-        }).then((reviews) =>{
+        }).then((reviews) => {
             const restraintReviewArray = reviews.filter((review, i) => review["restaurant_id"] == restaurantId)
 
-            callback(null,restraintReviewArray);
-        }).catch((error) =>{
-            callback(error,null)
+            IndexDBHelper.storeReviews(reviews);
+
+            callback(null, restraintReviewArray);
+        }).catch((ex) => {
+            const error = (`Request failed. Returned status of ${ex}`);
+            //get response from index db if available
+            IndexDBHelper.fetchReviews(restaurantId, callback);
         });
     }
-    
+
     /**
      * post a review on a restaurant
      */
-    static postRestaurantReview (review,callback){
-        fetch(DBHelper.DATABASE_URL + '/reviews',{
-            method : "POST",
-            body : review,
+
+    static postRestaurantReview(review, callback) {
+        fetch(DBHelper.DATABASE_URL + '/reviews', {
+            method: "POST",
+            body: review,
         }).then((response) => {
-            response.json();
-        }).then((json) =>{
-            callback(null,json);
-        })
+            return response.json();
+        }).then((addedReview) => {
+            //cach reviews in indexdb
+            review = Object.assign(addedReview,review);
+            IndexDBHelper.postReview(review);
+            callback(null, review);
+        }).catch((ex) => {
+            const error = (`Request failed. Returned status of ${ex}`);
+            IndexDBHelper.postReviewOffline(review, callback);
+        });
     }
-    
+
 
     /**
      * Restaurant page URL.
